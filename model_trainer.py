@@ -55,11 +55,17 @@ def create_chess_nn_model(max_timesteps, vocab_size):
 
 
 def train_and_save_model(X_train, y_train, model_path='chess_ai_model.keras'):
+    """Load an existing model if possible; otherwise create a new one."""
+    model = None
     if os.path.exists(model_path):
-        model = tf.keras.models.load_model(model_path)
-        print("Loaded existing model.")
-    else:
-        print("No existing model found. Creating new one.")
+        try:
+            model = tf.keras.models.load_model(model_path)
+            print("Loaded existing model.")
+        except Exception as e:
+            print(f"[WARN] Could not load model '{model_path}': {e}")
+
+    if model is None:
+        print("Creating new model.")
         max_timesteps = X_train.shape[1]
         vocab_size = int(y_train.max()) + 1
         model = create_chess_nn_model(max_timesteps, vocab_size)
